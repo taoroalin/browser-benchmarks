@@ -1,1 +1,1 @@
-Browser Benchmark is a collection of benchmarks of JavaScript / DOM features. Most of these are comparisons between different coding patterns, such as `Set` vs `{}`, meant to inform my coding practices. Any contributions welcome.
+Browser Benchmarks is a collection of benchmarks of JavaScript / DOM features. Most of these are comparisons between different coding patterns, such as `Set` vs `{}`, meant to inform coding practices. Any contributions welcome.

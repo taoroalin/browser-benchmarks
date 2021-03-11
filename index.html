@@ -1,5 +1,18 @@
 <body>
+  <style>
+    body {
+      margin: 0
+    }
+
+    .result {
+      display: flex;
+      flex-direction: row;
+    }
+  </style>
   <h1>Browser benchmarks</h1>
+  <div id="dom-sandbox">
+  </div>
+  <div id="canvas-sandbox"></div>
   <div id="tests"></div>
 
   <template id="test">
@@ -7,6 +20,7 @@
       <h2>
       </h2>
       <div class="result-list"></div>
+      <canvas class="chart"></canvas>
     </div>
   </template>
 
@@ -18,5 +32,5 @@
   </template>
 
   <script src="./main.js"></script>
-
+  <canvas id="charttest"></canvas>
 </body>
