@@ -3,12 +3,30 @@ const testsElement = document.getElementById("tests")
 const resultTemplate = document.getElementById("result").content.firstElementChild
 const testTemplate = document.getElementById("test").content.firstElementChild
 
-// const formatNum = (num,sigfigs) => {
-//   const log = Math.floor(Math.log10(num))
-//   let str = "" + Math.round(num * Math.pow(10,sigfigs - 1 - log))
-//   str += "0".repeat()
-//   return  * Math.pow(10,log - sigfigs + 1)
-// }
+const macroTest = `
+()=>{
+  ~setup~
+  const stime = performance.now()
+  for(let i=0;i<~reps~;i++){
+    ~body~
+  }
+  const duration = performance.now()-stime
+  return {duration}
+}()
+`
+
+const rands = []
+for (let i = 0; i < 10000000; i++) {
+  rands.push(Math.random())
+}
+
+const doMacro = (stringMap,template) => {
+  let string = template
+  for (let key in stringMap) {
+    string = string.replace('~' + key + '~',stringMap[key])
+  }
+  return eval(string)
+}
 
 const testAll = () => {
   const results = []
@@ -115,7 +133,7 @@ const tests = [{
     }
   }],
 },{
-  name: "Math.max vs if(_>_)_=_",cases: [{
+  name: "x=Math.max(x,y) vs if(y>x)x=y",cases: [{
     name: "Math.max",fn: () => {
       let z = 0
       for (let i = 0; i < 1000000; i++) {
@@ -130,6 +148,67 @@ const tests = [{
       }
     }
   }],
-}]
+},{
+  name: "Multiple Accumulators",cases: [{
+    name: "1 accumulator",fn: () => {
+      let z = 0
+      let i = 0
+      while (i < 100000000) {
+        z += rands[i]
+        i++
+      }
+    }
+  },{
+    name: "2 accumulators",fn: () => {
+      let z = 0
+      let z2 = 0
+      let i1 = 0
+      while (i1 < 50000000) {
+        z += rands[i1]
+        z2 += rands[i1 + 1]
+        i1 += 2
+      }
+      z += z2
+    }
+  },{
+    name: "3 accumulators",fn: () => {
+      let z = 0
+      let z2 = 0
+      let z3 = 0
+      let i1 = 0
+      while (i1 < 33333333) {
+        z += rands[i1]
+        z2 += rands[i1 + 1]
+        z3 += rands[i1 + 2]
+        i1 += 3
+      }
+      z += z2 + z3
+    }
+  }],
+}
+  // todo measure domnode.thing= vs domnode.dataset.thing= vs domnode.setAttribute(thing)
+
+]
 
 testAll()
+
+const mtp = {
+  name: "x=Math.max(x,y) vs if(y>x)x=y",reps: 1000000,cases: [{
+    name: "Math.max",setup: `let z = 0`,body: `z = Math.max(i,z)`
+  },{
+    name: "if",setup: `let z = 0`,body: `if(i>z)z=i`
+  }],
+}
+
+const runTestM = (test) => {
+  const results = test.cases.map((aCase) => {
+    const returns = { name: aCase.name }
+    const stime = performance.now()
+    aCase.fn()
+    returns.time = performance.now() - stime
+    return returns
+  })
+  return { name: test.name,results }
+}
+
+runTestM(mtp)
