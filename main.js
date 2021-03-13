@@ -1,5 +1,7 @@
 let timeToSpend = 20
 
+let minReps = 10
+
 const testsElement = document.getElementById("tests")
 
 const resultTemplate = document.getElementById("result").content.firstElementChild
@@ -61,17 +63,19 @@ const renderTest = (testResult) => {
     resultEl.children[1].innerText = result.times[result.times.length - 1].toPrecision(3)
     el.children[1].appendChild(resultEl)
   }
+  console.log(testResult)
   testsElement.appendChild(el)
+  chart(el.children[2],testResult)
 }
 
 const runTest = (test) => {
   const results = test.cases.map((aCase) => {
     const result = { name: aCase.name,times: [] }
-    let reps = 1
+    let reps = minReps
     do {
       result.times.push(doMacro(macroTest,{ ...aCase,reps }))
       reps *= 10
-    } while (result.times[result.times.length - 1] < 10)
+    } while (result.times[result.times.length - 1] < timeToSpend)
     return result
   })
   return { name: test.name,results }
@@ -123,7 +127,7 @@ const tests = [
       name: "if",setup: "let z=0",body: "if(i>z)z=i"
     }],
   },{
-    name: "Accumulation",cases: [
+    name: "Accumulation",cases: [ // BIG bug here, need different loop counts
       {
         name: "1 accumulator",setup: `
           let z = 0
@@ -163,6 +167,22 @@ const tests = [
       },{
         name: "function",setup: "let fn=()=>{}",body: "fn()"
       }
+    ]
+  },{
+    name: "setting attributes individually vs at once",cases: [
+      { name: "individually",setup: `const arr = []`,body: `const obj = {};obj.a=i;obj.b=i;obj.c=1;obj[i]=i;arr.push(obj)` },
+      { name: "at once",setup: `const arr = []`,body: `const obj = {a:i,b:i,c:1,[i]:i};arr.push(obj)` }
+    ]
+  },{
+    name: "calling method vs function",cases: [
+      { name: "method",setup: `const obj = {fno:function(){this.data},data:3};const fng = (obj)=>obj.data;`,body: `obj.fno()` },
+      { name: "function",setup: `const obj = {fno:function(){this.data},data:3};const fng = (obj)=>obj.data;`,body: `fng(obj)` }
+    ]
+  },{
+    name: "dom dataset attr vs raw attr vs setAttribute",cases: [
+      { name: "dataset",body: `let dom = document.createElement("div");dom.dataset[i]=i;dom.dataset.a=1;dom.dataset.b=2` },
+      { name: "attr",body: `let dom=document.createElement("div");dom[i]=i;dom.a=1;dom.b=1` },
+      { name: "setAttr",body: `let dom=document.createElement("div");dom.setAttribute("h"+i,i);dom.setAttribute("a",1);dom.setAttribute("b",1);` }
     ]
   }
   // todo measure domnode.thing= vs domnode.dataset.thing= vs domnode.setAttribute(thing)

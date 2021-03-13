@@ -1,7 +1,8 @@
 <body>
   <style>
     body {
-      margin: 0
+      margin: 0;
+      font-family: Inter, Verdana;
     }
 
     .result {
@@ -9,10 +10,12 @@
       flex-direction: row;
     }
   </style>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata">
   <h1>Browser benchmarks</h1>
   <div id="dom-sandbox">
   </div>
-  <div id="canvas-sandbox"></div>
+  <canvas id="test-canvas"></canvas>
   <div id="tests"></div>
 
   <template id="test">
@@ -31,6 +34,6 @@
     </div>
   </template>
 
+  <script src="./chart.js"></script>
   <script src="./main.js"></script>
-  <canvas id="charttest"></canvas>
 </body>
