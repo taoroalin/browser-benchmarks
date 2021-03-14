@@ -2,6 +2,17 @@ let timeToSpend = 20
 
 let minReps = 10
 
+// faster, looser random
+// https://en.wikipedia.org/wiki/Linear_congruential_generator#Parameters_in_common_use
+const randomConstantA = 65793
+const randomConstantC = 4282663
+const randomConstantM = 8388608 // 2^23
+let randomSeed = Math.floor(Math.random() * randomConstantM)
+const random = () => {
+  randomSeed = (randomConstantA * randomSeed + randomConstantC) % randomConstantM
+  return randomSeed / randomConstantM
+}
+
 const testsElement = document.getElementById("tests")
 
 const resultTemplate = document.getElementById("result").content.firstElementChild
@@ -31,7 +42,7 @@ for(let i=0;i<A_LOT;i++){
 
 const rands = []
 for (let i = 0; i < 10000000; i++) {
-  rands.push(Math.random())
+  rands.push(random())
 }
 
 const doMacro = (template,map) => {
@@ -101,12 +112,30 @@ const runTest = (test) => {
 
 const tests = [
   {
-    name: "Set vs {thing:true} vs {thing:1}",params: [{ name: "adds",min: 1,max: 10 },{ name: "deletes",min: 1,max: 10 },{ name: "gets",min: 1,max: 1000 }],cases: [{
+    name: "additional wrapper functions",cases: [{
+      name: "0 wrappers",setup: 'const fn1 = ()=>{};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{}',body: 'fn1()'
+    },{
+      name: "1 wrappers",setup: 'const fn1 = ()=>{};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{}',body: 'fn1(fn2())'
+    },{
+      name: "2 wrappers",setup: 'const fn1 = ()=>{};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{}',body: 'fn1(fn2(fn3()))'
+    },{
+      name: "3 wrappers",setup: 'const fn1 = ()=>{};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{}',body: 'fn1(fn2(fn3(fn4())))'
+    }]
+  },{
+    name: "Set vs {thing:true} vs {thing:1} adds and checks",cases: [{
       name: "{thing:true}",setup: 'const obj = {}',body: 'obj[i]=true;obj[i]'
     },{
       name: "Set",setup: "const set = new Set()",body: 'set.add(i);set.has(i)'
     },{
       name: "{thing:1}",setup: 'const obj = {}',body: 'obj[i]=1;obj[i]'
+    },]
+  },{
+    name: "Set vs {thing:true} vs {thing:1} adds and deletes",cases: [{
+      name: "{thing:true}",setup: 'const obj = {}',body: 'obj[i]=true;delete obj[i]'
+    },{
+      name: "Set",setup: "const set = new Set()",body: 'set.add(i);set.delete(i)'
+    },{
+      name: "{thing:1}",setup: 'const obj = {}',body: 'obj[i]=1;delete obj[i]'
     },]
   },{
     name: "strlen vs Math.Log",cases: [{
@@ -126,40 +155,6 @@ const tests = [
     },{
       name: "if",setup: "let z=0",body: "if(i>z)z=i"
     }],
-  },{
-    name: "Accumulation",cases: [ // BIG bug here, need different loop counts
-      {
-        name: "1 accumulator",setup: `
-          let z = 0
-          let i = 0`,
-        body: `
-            z += rands[i]
-            i++`
-      },{
-        name: "2 accumulators",setup: `
-          let z = 0
-          let z2 = 0
-          let i1 = 0`,
-        body: `
-            z += rands[i1]
-            z2 += rands[i1 + 1]
-            i1 += 2`,
-        cleanup: `z += z2`
-      },{
-        name: "3 accumulators",
-        setup: `
-          let z = 0
-          let z2 = 0
-          let z3 = 0
-          let i1 = 0
-          `,
-        body: `
-            z += rands[i1]
-            z2 += rands[i1 + 1]
-            z3 += rands[i1 + 2]
-            i1 += 3`,
-        cleanup: `z += z2 + z3`
-      }],
   },{
     name: "function vs ()=>{}",cases: [
       {
@@ -184,8 +179,96 @@ const tests = [
       { name: "attr",body: `let dom=document.createElement("div");dom[i]=i;dom.a=1;dom.b=1` },
       { name: "setAttr",body: `let dom=document.createElement("div");dom.setAttribute("h"+i,i);dom.setAttribute("a",1);dom.setAttribute("b",1);` }
     ]
+  },{
+    name: "Sort build-in comparator vs custom comparator",cases: [
+      { name: "built-in",setup: "let list = []",body: "list.push(random())",cleanup: `list.sort()` },
+      { name: "built-in",setup: "let list = []",body: "list.push(random())",cleanup: `list.sort((a,b)=>a-b)` }
+    ]
+  },{
+    name: "Math.random vs lcg",cases: [
+      { name: "Math.random",body: "Math.random()" },
+      { name: "lcg",body: "random()" },
+    ]
+  },{
+    name: "switch vs if/else vs if/return",cases: [
+      {
+        name: "if/else",body: `let v = i%3;
+    if (v===0){
+      let t=v*2
+    }else if (v===1){
+      let t=v*3
+    }else if (v===2){
+      let t=v*4
+    }`},
+      {
+        name: "if/break",body: `let v = i%3;
+        switch(1){ // have switch here cuz need something to break/return out of?
+          case 1:
+            if (v===0){
+              let t=v*2
+              break
+            }
+            if (v===1){
+              let t=v*5
+              break
+            }
+            if (v===2){
+              let t=v*4
+              break
+            }
+        }
+    `},
+      {
+        name: "switch",body: `let v = i%3;
+        let t
+    switch(v){
+      case 0:
+        t=v*2
+        break
+      case 1:
+        t=v*3
+        break
+      case 2:
+        t=v*4
+        break
+    }`}
+    ]
   }
-  // todo measure domnode.thing= vs domnode.dataset.thing= vs domnode.setAttribute(thing)
+  // {
+  //   name: "Accumulation",cases: [ // BIG bug here, need different loop counts
+  //     {
+  //       name: "1 accumulator",setup: `
+  //         let z = 0
+  //         let i = 0`,
+  //       body: `
+  //           z += rands[i]
+  //           i++`
+  //     },{
+  //       name: "2 accumulators",setup: `
+  //         let z = 0
+  //         let z2 = 0
+  //         let i1 = 0`,
+  //       body: `
+  //           z += rands[i1]
+  //           z2 += rands[i1 + 1]
+  //           i1 += 2`,
+  //       cleanup: `z += z2`
+  //     },{
+  //       name: "3 accumulators",
+  //       setup: `
+  //         let z = 0
+  //         let z2 = 0
+  //         let z3 = 0
+  //         let i1 = 0
+  //         `,
+  //       body: `
+  //           z += rands[i1]
+  //           z2 += rands[i1 + 1]
+  //           z3 += rands[i1 + 2]
+  //           i1 += 3`,
+  //       cleanup: `z += z2 + z3`
+  //     }],
+  // }
 
 ]
 
