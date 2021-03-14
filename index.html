@@ -9,14 +9,34 @@
       display: flex;
       flex-direction: row;
     }
+
+    #tests {
+      margin: 30px auto;
+      max-width: 600px;
+    }
+
+    #top {
+      text-align: center;
+    }
+
+    #tests-scroll-region {
+      width: 100%;
+    }
+
+    .test {
+      text-align: center;
+    }
   </style>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata">
-  <h1>Browser benchmarks</h1>
   <div id="dom-sandbox">
   </div>
-  <canvas id="test-canvas"></canvas>
-  <div id="tests"></div>
+  <div id="top">
+    <h1>Browser benchmarks</h1>
+  </div>
+  <div id="tests-scroll-region">
+    <div id="tests"></div>
+  </div>
 
   <template id="test">
     <div class="test">

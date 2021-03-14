@@ -57,12 +57,12 @@ const testAll = () => {
 const renderTest = (testResult) => {
   const el = testTemplate.cloneNode(true)
   el.children[0].innerText = testResult.name
-  for (let result of testResult.results) {
-    const resultEl = resultTemplate.cloneNode(true)
-    resultEl.children[0].innerText = result.name
-    resultEl.children[1].innerText = result.times[result.times.length - 1].toPrecision(3)
-    el.children[1].appendChild(resultEl)
-  }
+  // for (let result of testResult.results) {
+  //   const resultEl = resultTemplate.cloneNode(true)
+  //   resultEl.children[0].innerText = result.name
+  //   resultEl.children[1].innerText = result.times[result.times.length - 1].toPrecision(3)
+  //   el.children[1].appendChild(resultEl)
+  // }
   console.log(testResult)
   testsElement.appendChild(el)
   chart(el.children[2],testResult)
@@ -115,8 +115,8 @@ const tests = [
       name: "log",body: "Math.floor(Math.log(i))"
     }]
   },{
-    name: "''+ vs .toString",cases: [{
-      name: "''+",body: `""+i`
+    name: `""+ vs .toString`,cases: [{
+      name: `""+`,body: `""+i`
     },{
       name: ".toString",body: "i.toString()"
     }],
@@ -165,7 +165,7 @@ const tests = [
       {
         name: "function",setup: "function fn(){}",body: "fn()"
       },{
-        name: "function",setup: "let fn=()=>{}",body: "fn()"
+        name: "()=>{}",setup: "let fn=()=>{}",body: "fn()"
       }
     ]
   },{

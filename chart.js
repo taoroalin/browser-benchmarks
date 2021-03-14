@@ -43,16 +43,56 @@ const chart = (canvas,data,config) => {
   const pxPerY = canvasHeight / (Math.log10(ymax) - Math.log10(ymin))
   const yoffset = pxPerY * Math.log10(ymin)
 
-  ctx.fillStyle = "#000000"
-  ctx.strokeStyle = "#000000"
   for (let i = 0; i < xmax; i++) {
+    ctx.fillStyle = "#000000"
+    ctx.strokeStyle = "#000000"
     const x = i * pxPerX
     ctx.beginPath()
+    if (i <= xmax * 0.5) {
+      ctx.moveTo(x,0)
+      ctx.lineTo(x,5 * config.canvasScale)
+      ctx.stroke()
+      ctx.fillText(`e+${i + 1}`,x - config.fontSize * config.canvasScale * 2.05,(config.fontSize - 2) * config.canvasScale)
+    } else {
+      ctx.moveTo(x,canvasHeight)
+      ctx.lineTo(x,canvasHeight - 5 * config.canvasScale)
+      ctx.stroke()
+      ctx.fillText(`e+${i + 1}`,x - config.fontSize * config.canvasScale * 2.05,canvasHeight - 5)
+    }
+    ctx.strokeStyle = "#666666"
+    ctx.lineWidth = 1
+    ctx.beginPath()
     ctx.moveTo(x,0)
-    ctx.lineTo(x,5 * config.canvasScale)
+    ctx.lineTo(x,canvasHeight)
     ctx.stroke()
-    ctx.fillText(`e+${i + 1}`,x - config.fontSize * config.canvasScale * 2.05,(config.fontSize - 2) * config.canvasScale)
   }
+
+  // for(let i=0;i<4;i++){
+  //   ctx.fillStyle = "#000000"
+  //   ctx.strokeStyle = "#000000"
+  //   const y = i * pxPerY
+  //   ctx.beginPath()
+  //   if (i <= xmax * 0.5) {
+  //     ctx.moveTo(x,0)
+  //     ctx.lineTo(x,5 * config.canvasScale)
+  //     ctx.stroke()
+  //     ctx.fillText(`e+${i + 1}`,x - config.fontSize * config.canvasScale * 2.05,(config.fontSize - 2) * config.canvasScale)
+  //   } else {
+  //     ctx.moveTo(x,canvasHeight)
+  //     ctx.lineTo(x,canvasHeight - 5 * config.canvasScale)
+  //     ctx.stroke()
+  //     ctx.fillText(`e+${i + 1}`,x - config.fontSize * config.canvasScale * 2.05,canvasHeight - 5)
+  //   }
+  //   ctx.strokeStyle = "#666666"
+  //   ctx.lineWidth = 1
+  //   ctx.beginPath()
+  //   ctx.moveTo(x,0)
+  //   ctx.lineTo(x,canvasHeight)
+  //   ctx.stroke()
+  // }
+
+  ctx.lineWidth = config.lineWidth * config.canvasScale
+
 
   for (let colNum = 0; colNum < data.results.length; colNum++) {
     const col = data.results[colNum]
@@ -72,13 +112,3 @@ const chart = (canvas,data,config) => {
   }
 
 }
-
-const canvasTestElement = document.getElementById("canvas-test")
-
-const testData = { name: "testdata",results: [{ times: [1,2,3,4,5,6,7] },{ times: [0,1,4,9,16,36,49] }] }
-// chart(canvasTestElement,testData)
-
-const testCanvas = document.getElementById("test-canvas")
-const ctx = testCanvas.getContext("2d")
-ctx.font = "14px serif"
-ctx.fillText("hello there",100,100)
