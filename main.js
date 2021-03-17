@@ -114,13 +114,15 @@ const runTest = (test) => {
 const tests = [
   {
     name: "additional wrapper functions", cases: [{
-      name: "0 wrappers", setup: 'const fn1 = ()=>{};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{}', body: 'fn1()'
+      name: "0 wrappers", setup: 'const fn1 = ()=>{mut+=1};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{};let mut = 0', body: 'mut+=1'
     }, {
-      name: "1 wrappers", setup: 'const fn1 = ()=>{};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{}', body: 'fn1(fn2())'
+      name: "1 wrapper", setup: 'const fn1 = ()=>{mut+=1};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{};let mut = 0;', body: 'fn1()'
     }, {
-      name: "2 wrappers", setup: 'const fn1 = ()=>{};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{}', body: 'fn1(fn2(fn3()))'
+      name: "2 wrappers", setup: 'const fn1 = ()=>{mut+=1};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{};let mut = 0;', body: 'fn1(fn2())'
     }, {
-      name: "3 wrappers", setup: 'const fn1 = ()=>{};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{}', body: 'fn1(fn2(fn3(fn4())))'
+      name: "3 wrappers", setup: 'const fn1 = ()=>{mut+=1};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{}; let mut = 0', body: 'fn1(fn2(fn3()))'
+    }, {
+      name: "4 wrappers", setup: 'const fn1 = ()=>{mut+=1};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{}; let mut = 0', body: 'fn1(fn2(fn3(fn4())))'
     }]
   }, {
     name: "Set vs {thing:true} vs {thing:1} adds and checks", cases: [{
