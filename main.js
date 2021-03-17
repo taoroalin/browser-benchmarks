@@ -77,7 +77,7 @@ const renderTest = (testResult) => {
   // }
   console.log(testResult)
   testsElement.appendChild(el)
-  chart(el.children[2], testResult)
+  chart(el.children[3], testResult)
 }
 
 const runTest = (test) => {
@@ -185,7 +185,7 @@ const tests = [
   }, {
     name: "Sort build-in comparator vs custom comparator", cases: [
       { name: "built-in", setup: "let list = []", body: "list.push(random())", cleanup: `list.sort()` },
-      { name: "built-in", setup: "let list = []", body: "list.push(random())", cleanup: `list.sort((a,b)=>a-b)` }
+      { name: "custom", setup: "let list = []", body: "list.push(random())", cleanup: `list.sort((a,b)=>a-b)` }
     ]
   }, {
     name: "Math.random vs lcg", cases: [

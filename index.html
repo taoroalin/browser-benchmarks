@@ -26,6 +26,14 @@
     .test {
       text-align: center;
     }
+
+    .test-name {
+      margin-bottom: 12px;
+    }
+
+    .description {
+      margin-bottom: 12px;
+    }
   </style>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata">
@@ -40,9 +48,10 @@
 
   <template id="test">
     <div class="test">
-      <h2>
+      <h2 class="test-name">
       </h2>
       <div class="result-list"></div>
+      <div class="description">Time in log<sub>10</sub> vs iterations in log<sub>10</sub></div>
       <canvas class="chart" width="350" height="200"></canvas>
     </div>
   </template>
