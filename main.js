@@ -45,21 +45,22 @@ for (let i = 0; i < 10000000; i++) {
   rands.push(random())
 }
 
-const doMacro = (template,map) => {
+const doMacro = (template, map) => {
   let string = template
   const matches = template.matchAll(/~([a-zA-Z0-9_]+)~/g)
   for (let match of matches) {
-    string = string.replace(match[0],map[match[1]] || "")
+    string = string.replace(match[0], map[match[1]] || "")
   }
   return eval(string)
 }
 
-const testAll = () => {
+const testAll = async () => {
   const results = []
   for (let test of tests) {
     const testResult = runTest(test)
     results.push(testResult)
     renderTest(testResult)
+    await emptyPromise()
   }
   console.log(results)
   console.log(JSON.stringify(results))
@@ -76,20 +77,20 @@ const renderTest = (testResult) => {
   // }
   console.log(testResult)
   testsElement.appendChild(el)
-  chart(el.children[2],testResult)
+  chart(el.children[2], testResult)
 }
 
 const runTest = (test) => {
   const results = test.cases.map((aCase) => {
-    const result = { name: aCase.name,times: [] }
+    const result = { name: aCase.name, times: [] }
     let reps = minReps
     do {
-      result.times.push(doMacro(macroTest,{ ...aCase,reps }))
+      result.times.push(doMacro(macroTest, { ...aCase, reps }))
       reps *= 10
     } while (result.times[result.times.length - 1] < timeToSpend)
     return result
   })
-  return { name: test.name,results }
+  return { name: test.name, results }
 }
 
 // {
@@ -112,87 +113,111 @@ const runTest = (test) => {
 
 const tests = [
   {
-    name: "additional wrapper functions",cases: [{
-      name: "0 wrappers",setup: 'const fn1 = ()=>{};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{}',body: 'fn1()'
-    },{
-      name: "1 wrappers",setup: 'const fn1 = ()=>{};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{}',body: 'fn1(fn2())'
-    },{
-      name: "2 wrappers",setup: 'const fn1 = ()=>{};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{}',body: 'fn1(fn2(fn3()))'
-    },{
-      name: "3 wrappers",setup: 'const fn1 = ()=>{};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{}',body: 'fn1(fn2(fn3(fn4())))'
+    name: "additional wrapper functions", cases: [{
+      name: "0 wrappers", setup: 'const fn1 = ()=>{};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{}', body: 'fn1()'
+    }, {
+      name: "1 wrappers", setup: 'const fn1 = ()=>{};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{}', body: 'fn1(fn2())'
+    }, {
+      name: "2 wrappers", setup: 'const fn1 = ()=>{};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{}', body: 'fn1(fn2(fn3()))'
+    }, {
+      name: "3 wrappers", setup: 'const fn1 = ()=>{};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{}', body: 'fn1(fn2(fn3(fn4())))'
     }]
-  },{
-    name: "Set vs {thing:true} vs {thing:1} adds and checks",cases: [{
-      name: "{thing:true}",setup: 'const obj = {}',body: 'obj[i]=true;obj[i]'
-    },{
-      name: "Set",setup: "const set = new Set()",body: 'set.add(i);set.has(i)'
-    },{
-      name: "{thing:1}",setup: 'const obj = {}',body: 'obj[i]=1;obj[i]'
+  }, {
+    name: "Set vs {thing:true} vs {thing:1} adds and checks", cases: [{
+      name: "{thing:true}", setup: 'const obj = {}', body: 'obj[i]=true;obj[i]'
+    }, {
+      name: "Set", setup: "const set = new Set()", body: 'set.add(i);set.has(i)'
+    }, {
+      name: "{thing:1}", setup: 'const obj = {}', body: 'obj[i]=1;obj[i]'
     },]
-  },{
-    name: "Set vs {thing:true} vs {thing:1} adds and deletes",cases: [{
-      name: "{thing:true}",setup: 'const obj = {}',body: 'obj[i]=true;delete obj[i]'
-    },{
-      name: "Set",setup: "const set = new Set()",body: 'set.add(i);set.delete(i)'
-    },{
-      name: "{thing:1}",setup: 'const obj = {}',body: 'obj[i]=1;delete obj[i]'
+  }, {
+    name: "Set vs {thing:true} vs {thing:1} adds and deletes", cases: [{
+      name: "{thing:true}", setup: 'const obj = {}', body: 'obj[i]=true;delete obj[i]'
+    }, {
+      name: "Set", setup: "const set = new Set()", body: 'set.add(i);set.delete(i)'
+    }, {
+      name: "{thing:1}", setup: 'const obj = {}', body: 'obj[i]=1;delete obj[i]'
     },]
-  },{
-    name: "strlen vs Math.Log",cases: [{
-      name: "strlen",body: "i.toString().length"
-    },{
-      name: "log",body: "Math.floor(Math.log(i))"
+  }, {
+    name: "strlen vs Math.Log", cases: [{
+      name: "strlen", body: "i.toString().length"
+    }, {
+      name: "log", body: "Math.floor(Math.log(i))"
     }]
-  },{
-    name: `""+ vs .toString`,cases: [{
-      name: `""+`,body: `""+i`
-    },{
-      name: ".toString",body: "i.toString()"
+  }, {
+    name: `""+ vs .toString`, cases: [{
+      name: `""+`, body: `""+i`
+    }, {
+      name: ".toString", body: "i.toString()"
     }],
-  },{
-    name: "x=Math.max(x,y) vs if(y>x)x=y",cases: [{
-      name: "Math.max",setup: "let z=0",body: "z=Math.max(i,z)"
-    },{
-      name: "if",setup: "let z=0",body: "if(i>z)z=i"
+  }, {
+    name: "x=Math.max(x,y) vs if(y>x)x=y", cases: [{
+      name: "Math.max", setup: "let z=0", body: "z=Math.max(i,z)"
+    }, {
+      name: "if", setup: "let z=0", body: "if(i>z)z=i"
     }],
-  },{
-    name: "function vs ()=>{}",cases: [
+  }, {
+    name: "function vs ()=>{}", cases: [
       {
-        name: "function",setup: "function fn(){}",body: "fn()"
-      },{
-        name: "()=>{}",setup: "let fn=()=>{}",body: "fn()"
+        name: "function", setup: "function fn(){}", body: "fn()"
+      }, {
+        name: "()=>{}", setup: "let fn=()=>{}", body: "fn()"
       }
     ]
-  },{
-    name: "setting attributes individually vs at once",cases: [
-      { name: "individually",setup: `const arr = []`,body: `const obj = {};obj.a=i;obj.b=i;obj.c=1;obj[i]=i;arr.push(obj)` },
-      { name: "at once",setup: `const arr = []`,body: `const obj = {a:i,b:i,c:1,[i]:i};arr.push(obj)` }
+  }, {
+    name: "setting attributes individually vs at once", cases: [
+      { name: "individually", setup: `const arr = []`, body: `const obj = {};obj.a=i;obj.b=i;obj.c=1;obj[i]=i;arr.push(obj)` },
+      { name: "at once", setup: `const arr = []`, body: `const obj = {a:i,b:i,c:1,[i]:i};arr.push(obj)` }
     ]
-  },{
-    name: "calling method vs function",cases: [
-      { name: "method",setup: `const obj = {fno:function(){this.data},data:3};const fng = (obj)=>obj.data;`,body: `obj.fno()` },
-      { name: "function",setup: `const obj = {fno:function(){this.data},data:3};const fng = (obj)=>obj.data;`,body: `fng(obj)` }
+  }, {
+    name: "calling method vs function", cases: [
+      { name: "method", setup: `const obj = {fno:function(){this.data},data:3};const fng = (obj)=>obj.data;`, body: `obj.fno()` },
+      { name: "function", setup: `const obj = {fno:function(){this.data},data:3};const fng = (obj)=>obj.data;`, body: `fng(obj)` }
     ]
-  },{
-    name: "dom dataset attr vs raw attr vs setAttribute",cases: [
-      { name: "dataset",body: `let dom = document.createElement("div");dom.dataset[i]=i;dom.dataset.a=1;dom.dataset.b=2` },
-      { name: "attr",body: `let dom=document.createElement("div");dom[i]=i;dom.a=1;dom.b=1` },
-      { name: "setAttr",body: `let dom=document.createElement("div");dom.setAttribute("h"+i,i);dom.setAttribute("a",1);dom.setAttribute("b",1);` }
+  }, {
+    name: "dom dataset attr vs raw attr vs setAttribute", cases: [
+      { name: "dataset", body: `let dom = document.createElement("div");dom.dataset[i]=i;dom.dataset.a=1;dom.dataset.b=2` },
+      { name: "attr", body: `let dom=document.createElement("div");dom[i]=i;dom.a=1;dom.b=1` },
+      { name: "setAttr", body: `let dom=document.createElement("div");dom.setAttribute("h"+i,i);dom.setAttribute("a",1);dom.setAttribute("b",1);` }
     ]
-  },{
-    name: "Sort build-in comparator vs custom comparator",cases: [
-      { name: "built-in",setup: "let list = []",body: "list.push(random())",cleanup: `list.sort()` },
-      { name: "built-in",setup: "let list = []",body: "list.push(random())",cleanup: `list.sort((a,b)=>a-b)` }
+  }, {
+    name: "Sort build-in comparator vs custom comparator", cases: [
+      { name: "built-in", setup: "let list = []", body: "list.push(random())", cleanup: `list.sort()` },
+      { name: "built-in", setup: "let list = []", body: "list.push(random())", cleanup: `list.sort((a,b)=>a-b)` }
     ]
-  },{
-    name: "Math.random vs lcg",cases: [
-      { name: "Math.random",body: "Math.random()" },
-      { name: "lcg",body: "random()" },
+  }, {
+    name: "Math.random vs lcg", cases: [
+      { name: "Math.random", body: "Math.random()" },
+      { name: "lcg", body: "random()" },
     ]
-  },{
-    name: "switch vs if/else vs if/return",cases: [
+  }, {
+    name: "includes vs regex", cases: [{
+      name: "regex", body:
+        `"You have an idea for a television show about a group of strangers who arrive in a mysterious place that plays by very different rules than our reality. You figure out exactly how this place works, plot everything meticulously, and lay out mysteries for the characters and viewers to uncover slowly over time. You use flashbacks that parallel events to examine and deepen the characters. Your production values are top notch and you produce great television. Your show is not a smash hit, and you know exactly where you are going with all this, so you don’t waste a minute, keeping your seasons short. In the end it all fits together, and the journey was still pretty great on second viewing.".match(/characters/)`
+    }, { name: "includes", body: `"You have an idea for a television show about a group of strangers who arrive in a mysterious place that plays by very different rules than our reality. You figure out exactly how this place works, plot everything meticulously, and lay out mysteries for the characters and viewers to uncover slowly over time. You use flashbacks that parallel events to examine and deepen the characters. Your production values are top notch and you produce great television. Your show is not a smash hit, and you know exactly where you are going with all this, so you don’t waste a minute, keeping your seasons short. In the end it all fits together, and the journey was still pretty great on second viewing.".includes("characters")` }]
+  }, {
+    name: "handling errors", cases: [
       {
-        name: "if/else",body: `let v = i%3;
+        name: "no name error", body: `try{
+      imAFunction()
+    }catch(e){
+      
+    }`}, {
+        name: "Not an object error", setup: `const string = 1`, body: `try{
+      string[i]
+    }catch(e){
+      
+    }`}, {
+        name: "Not a function", setup: `const string = "hello"`, body: `try{
+      string()
+    }catch(e){
+      
+    }`}
+    ]
+  }, {
+    name: "switch vs if/else vs if/return", cases: [
+      {
+        name: "if/else", body: `let v = i%3;
     if (v===0){
       let t=v*2
     }else if (v===1){
@@ -201,7 +226,7 @@ const tests = [
       let t=v*4
     }`},
       {
-        name: "if/break",body: `let v = i%3;
+        name: "if/break", body: `let v = i%3;
         switch(1){ // have switch here cuz need something to break/return out of?
           case 1:
             if (v===0){
@@ -219,7 +244,7 @@ const tests = [
         }
     `},
       {
-        name: "switch",body: `let v = i%3;
+        name: "switch", body: `let v = i%3;
         let t
     switch(v){
       case 0:

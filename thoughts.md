@@ -1,0 +1,1 @@
+JS Benchmarks run well within an order of magnitude on my OnePlus6T Chromium vs Razer Blade 2018.
