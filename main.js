@@ -114,16 +114,30 @@ const runTest = (test) => {
 const tests = [
   {
     name: "additional wrapper functions", cases: [{
-      name: "0 wrappers", setup: 'const fn1 = ()=>{mut+=1};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{};let mut = 0', body: 'mut+=1'
+      name: "0 wrappers", setup: 'const fn1 = ()=>{mut+=1};const fn2 = ()=>{fn1()};const fn3=()=>{fn2()};fn4=()=>{fn3()};let mut = 0', body: 'mut+=1'
     }, {
       name: "1 wrapper", setup: 'const fn1 = ()=>{mut+=1};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{};let mut = 0;', body: 'fn1()'
     }, {
-      name: "2 wrappers", setup: 'const fn1 = ()=>{mut+=1};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{};let mut = 0;', body: 'fn1(fn2())'
+      name: "2 wrappers", setup: 'const fn1 = ()=>{mut+=1};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{};let mut = 0;', body: 'fn2()'
     }, {
-      name: "3 wrappers", setup: 'const fn1 = ()=>{mut+=1};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{}; let mut = 0', body: 'fn1(fn2(fn3()))'
+      name: "3 wrappers", setup: 'const fn1 = ()=>{mut+=1};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{}; let mut = 0', body: 'fn3()'
     }, {
-      name: "4 wrappers", setup: 'const fn1 = ()=>{mut+=1};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{}; let mut = 0', body: 'fn1(fn2(fn3(fn4())))'
+      name: "4 wrappers", setup: 'const fn1 = ()=>{mut+=1};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{}; let mut = 0', body: 'fn4()'
     }]
+  }, {
+    name: "additional empty functions", cases: [{
+      name: "0 functions", setup: 'const fn1 = ()=>{mut+=1};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{};let mut = 0', body: 'mut+=1'
+    }, {
+      name: "1 function", setup: 'const fn1 = ()=>{mut+=1};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{};let mut = 0;', body: 'fn1()'
+    }, {
+      name: "2 functions", setup: 'const fn1 = ()=>{mut+=1};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{};let mut = 0;', body: 'fn1(fn2())'
+    }, {
+      name: "3 functions", setup: 'const fn1 = ()=>{mut+=1};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{}; let mut = 0', body: 'fn1(fn2(fn3()))'
+    }, {
+      name: "4 functions", setup: 'const fn1 = ()=>{mut+=1};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{}; let mut = 0', body: 'fn1(fn2(fn3(fn4())))'
+    }]
+  }, {
+    name: "destructuring", cases: [{ name: "no destructuring", body: `let arr = [1,2,3,4];arr[0]+arr[1]+arr[2]+arr[3]` }, { name: "destructuring", body: `let arr=[1,2,3,4];let [a,b,c,d]=arr;a+b+c+d` }]
   }, {
     name: "Set vs {thing:true} vs {thing:1} adds and checks", cases: [{
       name: "{thing:true}", setup: 'const obj = {}', body: 'obj[i]=true;obj[i]'
