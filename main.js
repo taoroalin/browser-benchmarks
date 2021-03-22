@@ -111,6 +111,8 @@ const runTest = (test) => {
 //   }]
 // },
 
+const mask = [""]
+
 const tests = [
   {
     name: "additional wrapper functions", cases: [{
@@ -215,21 +217,31 @@ const tests = [
     name: "handling errors", cases: [
       {
         name: "no name error", body: `try{
-      imAFunction()
+      iTotallyHaveBeenDeclared
     }catch(e){
       
     }`}, {
-        name: "Not an object error", setup: `const string = 1`, body: `try{
-      string[i]
+        name: "Not an object error", setup: `const totallyAnObject = null`, body: `try{
+      totallyAnObject[i]
     }catch(e){
       
     }`}, {
-        name: "Not a function", setup: `const string = "hello"`, body: `try{
-      string()
+        name: "Not a function error", setup: `const totallyAFunction = "hello"`, body: `try{
+      totallyAFunction()
     }catch(e){
       
     }`}
     ]
+  }, {
+    name: "catch with no error", cases: [{
+      name: "try/catch with no error", setup: `const totallyAFunction = "hello"`, body: `try{
+      totallyAFunction
+    }catch(e){
+      
+    }`}, {
+      name: "No try/catch", setup: `const totallyAFunction = "hello"`, body: `
+      totallyAFunction
+    `}]
   }, {
     name: "switch vs if/else vs if/return", cases: [
       {
@@ -274,7 +286,10 @@ const tests = [
         break
     }`}
     ]
-  }
+  }, { name: "<< vs *", cases: [{ name: "<<3", body: "i<<3" }, { name: "*8", body: "i*8" }, { name: "*7", body: "i*7" }, { name: "i*i", body: "i*i", }, { name: "empty", body: "" }] },
+  { name: ">> vs /", cases: [{ name: ">>3", body: "i>>3" }, { name: "/8", body: "i/8" }, { name: "i/i", body: "i/i" }] },
+  // {name:"2d array vs strided array", cases:[{name:"2d", setup:`let arr = []`},{name:"strided"}]},
+
   // {
   //   name: "Accumulation",cases: [ // BIG bug here, need different loop counts
   //     {
