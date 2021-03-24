@@ -2,6 +2,9 @@ let timeToSpend = 20
 
 let minReps = 10
 
+const CHARS_64 = "-_0123456789abcdefghijklmnopqrstuvwxyzABCDEFJHIJKLMNOPQRSTUVWXYZ"
+const CHARS_16 = "0123456789ABCDEF"
+
 // faster, looser random
 // https://en.wikipedia.org/wiki/Linear_congruential_generator#Parameters_in_common_use
 const randomConstantA = 65793
@@ -11,6 +14,11 @@ let randomSeed = Math.floor(Math.random() * randomConstantM)
 const random = () => {
   randomSeed = (randomConstantA * randomSeed + randomConstantC) % randomConstantM
   return randomSeed / randomConstantM
+}
+
+const randomChar = () => {
+  randomSeed = (randomConstantA * randomSeed + randomConstantC) % randomConstantM
+  return CHARS_64[randomSeed % 64]
 }
 
 const testsElement = document.getElementById("tests")
@@ -39,11 +47,17 @@ for(let i=0;i<A_LOT;i++){
 ~cleanup~
 `
 
-
 const rands = []
 for (let i = 0; i < 10000000; i++) {
   rands.push(random())
 }
+
+const rsstime = performance.now()
+let randstring = ""
+for (let i = 0; i < 1000; i++) {
+  randstring = randstring + randomChar()
+}
+console.log(`rstring took ${performance.now() - rsstime}`)
 
 const doMacro = (template, map) => {
   let string = template
@@ -126,6 +140,10 @@ const tests = [
     }, {
       name: "4 wrappers", setup: 'const fn1 = ()=>{mut+=1};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{}; let mut = 0', body: 'fn4()'
     }]
+  }, { name: "destructured return vs multiple functions", cases: [{ name: "destructured return", setup: `const fn = (a)=>({low:a-1,high:a+1})`, body: `const {low,high}=fn(i)` }, { name: "multiple functions", setup: `const fn1=(a)=>a-1;const fn2=(a)=>a+1`, body: `const low = fn1(i);const high = fn2(i)` }] }, {
+    name: "substring equality vs individual char equality", cases: [{
+      name: "substring", body: `randstring.substring(0,2)==="or"`
+    }, { name: "individual char", body: `randstring[0]==='o' && randstring[1]==='r'` }]
   }, {
     name: "additional empty functions", cases: [{
       name: "0 functions", setup: 'const fn1 = ()=>{mut+=1};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{};let mut = 0', body: 'mut+=1'
