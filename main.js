@@ -52,6 +52,11 @@ for (let i = 0; i < 10000000; i++) {
   rands.push(random())
 }
 
+const maybeUndefineds = []
+for (let i = 0; i < 10000000; i++) {
+  rands.push(Math.random() > 0.5 ? undefined : true)
+}
+
 const rsstime = performance.now()
 let randstring = ""
 for (let i = 0; i < 1000; i++) {
@@ -129,6 +134,46 @@ const mask = [""]
 
 const tests = [
   {
+    name: "Pointless Await", cases: [
+
+      {
+        name: "Empty Promise", setup: `
+      const f1 = async (i)=>{
+        return await f2(true)
+      }
+      const f2 = async (bool)=>{
+        return await emptyPromise()
+      }`, body: `f1()`
+      },
+      {
+        name: "Pointless Await", setup: `
+      const f1 = async (i)=>{
+        return await f2(true)
+      }
+      const f2 = async (bool)=>{
+        return 1
+      }`, body: `f1()`
+      },
+      {
+        name: "Pointless async, not await", setup: `
+      const f1 = async (i)=>{
+        return f2(true)
+      }
+      const f2 = async (bool)=>{
+        return 1
+      }`, body: `f1()`
+      },
+      {
+        name: "No pointless await", setup: `
+      const f1 = (i)=>{
+        return f2(true)
+      }
+      const f2 = (bool)=>{
+        return 1
+      }`, body: `f1()`
+      }]
+  },
+  {
     name: "additional wrapper functions", cases: [{
       name: "0 wrappers", setup: 'const fn1 = ()=>{mut+=1};const fn2 = ()=>{fn1()};const fn3=()=>{fn2()};fn4=()=>{fn3()};let mut = 0', body: 'mut+=1'
     }, {
@@ -140,7 +185,9 @@ const tests = [
     }, {
       name: "4 wrappers", setup: 'const fn1 = ()=>{mut+=1};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{}; let mut = 0', body: 'fn4()'
     }]
-  }, { name: "destructured return vs multiple functions", cases: [{ name: "destructured return", setup: `const fn = (a)=>({low:a-1,high:a+1})`, body: `const {low,high}=fn(i)` }, { name: "multiple functions", setup: `const fn1=(a)=>a-1;const fn2=(a)=>a+1`, body: `const low = fn1(i);const high = fn2(i)` }] }, {
+  }, { name: "===undefined vs coerce", cases: [{ name: "void 0", body: `if(maybeUndefineds[i]===void 0){}` }, { name: "undefined", body: `if(maybeUndefineds[i]===undefined){}` }, { name: "coerce", body: `if(maybeUndefineds[i]){}` }] }, {
+    name: "destructured return vs multiple functions", cases: [{ name: "destructured return", setup: `const fn = (a)=>({low:a-1,high:a+1})`, body: `const {low,high}=fn(i)` }, { name: "multiple functions", setup: `const fn1=(a)=>a-1;const fn2=(a)=>a+1`, body: `const low = fn1(i);const high = fn2(i)` }]
+  }, { name: "if inside vs outside loop", cases: [{ name: "outside", setup: `if (true){`, body: `i+1`, cleanup: `}` }, { name: "inside", body: `if(true)i+1` }] }, {
     name: "substring equality vs individual char equality", cases: [{
       name: "substring", body: `randstring.substring(0,2)==="or"`
     }, { name: "individual char", body: `randstring[0]==='o' && randstring[1]==='r'` }]
