@@ -1,4 +1,5 @@
 let timeToSpend = 20
+let stime
 
 let minReps = 10
 
@@ -29,11 +30,22 @@ const testTemplate = document.getElementById("test").content.firstElementChild
 const macroTest = `
 (()=>{
   const stime = performance.now()
+  const reps = ~reps~;
   ~setup~
-  for(let i=0;i<~reps~;i++){
+  for(let i=0;i<reps;i++){
     ~body~
   }
   ~cleanup~
+  const duration = performance.now()-stime;
+  return duration
+})()
+`
+
+const macroTestManual = `
+(()=>{
+  const stime = performance.now()
+  const reps = ~reps~;
+  ~program~
   const duration = performance.now()-stime
   return duration
 })()
@@ -47,15 +59,27 @@ for(let i=0;i<A_LOT;i++){
 ~cleanup~
 `
 
+stime = performance.now()
 const rands = []
 for (let i = 0; i < 10000000; i++) {
   rands.push(random())
 }
+console.log(`rands took ${performance.now() - stime}`)
 
-const maybeUndefineds = []
-for (let i = 0; i < 10000000; i++) {
-  rands.push(Math.random() > 0.5 ? undefined : true)
+// stime = performance.now()
+// const maybeUndefineds = []
+// for (let i = 0; i < 1000000; i++) {
+//   rands.push(random() > 0.5 ? undefined : true)
+// }
+// console.log(`maybe undefs took ${performance.now() - stime}`)
+
+stime = performance.now()
+const repsLengthLists = {}
+const mx = Math.pow(10, 8)
+for (let i = minReps; i < mx; i *= 10) {
+  repsLengthLists[i] = [...Array(i)]
 }
+console.log(`repslengths took ${performance.now() - stime}`)
 
 const rsstime = performance.now()
 let randstring = ""
@@ -100,13 +124,18 @@ const renderTest = (testResult) => {
 }
 
 const runTest = (test) => {
+  const timeToSpendHere = test.timeToSpend || timeToSpend
   const results = test.cases.map((aCase) => {
     const result = { name: aCase.name, times: [] }
     let reps = minReps
     do {
-      result.times.push(doMacro(macroTest, { ...aCase, reps }))
+      if (aCase.program) {
+        result.times.push(doMacro(macroTestManual, { ...aCase, reps }))
+      } else {
+        result.times.push(doMacro(macroTest, { ...aCase, reps }))
+      }
       reps *= 10
-    } while (result.times[result.times.length - 1] < timeToSpend)
+    } while (result.times[result.times.length - 1] < timeToSpendHere)
     return result
   })
   return { name: test.name, results }
@@ -133,6 +162,21 @@ const runTest = (test) => {
 const mask = [""]
 
 const tests = [
+  {
+    name: "reduce styles", timeToSpend: 10, cases: [
+      { name: "c style for", program: `let thwab = 0;for(let i=0;i<reps;i++){thwab+=rands[i]}` },
+      { name: "while", program: `let thwab = 0;let i=0;while(i<reps){i++;thwab+=rands[i]}` },
+      { name: "forEach", program: `let thwab = 0;repsLengthLists[reps].forEach((thing)=>{thwab+=thing})` },
+      { name: "for of", program: `let thwab = 0;const ls = repsLengthLists[reps];for(let thing of ls){thwab+=thing}` },
+      { name: "reduce", program: `repsLengthLists[reps].reduce((a,n)=>a+n, 0)` },
+    ]
+  },
+  {
+    name: "constant object in loop", cases: [
+      { name: "outside loop", setup: `const obj = {1:2,3:4,5:6,7:8,9:10}`, body: `obj[1]` },
+      { name: "inside loop", setup: ``, body: `const obj = {1:2,3:4,5:6,7:8,9:10};obj[1]` },
+    ]
+  },
   {
     name: "Pointless Await", cases: [
 
@@ -185,7 +229,13 @@ const tests = [
     }, {
       name: "4 wrappers", setup: 'const fn1 = ()=>{mut+=1};const fn2 = ()=>{};const fn3=()=>{};fn4=()=>{}; let mut = 0', body: 'fn4()'
     }]
-  }, { name: "===undefined vs coerce", cases: [{ name: "void 0", body: `if(maybeUndefineds[i]===void 0){}` }, { name: "undefined", body: `if(maybeUndefineds[i]===undefined){}` }, { name: "coerce", body: `if(maybeUndefineds[i]){}` }] }, {
+  },
+  // {
+  //   name: "===undefined vs coerce", cases: [
+  //     { name: "void 0", body: `if(maybeUndefineds[i]===void 0){}` },
+  //     { name: "undefined", body: `if(maybeUndefineds[i]===undefined){}` }, { name: "coerce", body: `if(maybeUndefineds[i]){}` }]
+  // },
+  {
     name: "destructured return vs multiple functions", cases: [{ name: "destructured return", setup: `const fn = (a)=>({low:a-1,high:a+1})`, body: `const {low,high}=fn(i)` }, { name: "multiple functions", setup: `const fn1=(a)=>a-1;const fn2=(a)=>a+1`, body: `const low = fn1(i);const high = fn2(i)` }]
   }, { name: "if inside vs outside loop", cases: [{ name: "outside", setup: `if (true){`, body: `i+1`, cleanup: `}` }, { name: "inside", body: `if(true)i+1` }] }, {
     name: "substring equality vs individual char equality", cases: [{
@@ -353,6 +403,13 @@ const tests = [
     ]
   }, { name: "<< vs *", cases: [{ name: "<<3", body: "i<<3" }, { name: "*8", body: "i*8" }, { name: "*7", body: "i*7" }, { name: "i*i", body: "i*i", }, { name: "empty", body: "" }] },
   { name: ">> vs /", cases: [{ name: ">>3", body: "i>>3" }, { name: "/8", body: "i/8" }, { name: "i/i", body: "i/i" }] },
+  {
+    name: "pre-sized array", cases: [
+      { name: "no pre-sizing", setup: `let arr = []`, body: `arr[i]=1` },
+      { name: "pre-sizing", setup: `let arr=Array(reps)`, body: `arr[i]=1` },
+      { name: "pre-accessing", setup: `let arr=[];arr[reps]=1`, body: `arr[i]=1` }
+    ]
+  },
   // {name:"2d array vs strided array", cases:[{name:"2d", setup:`let arr = []`},{name:"strided"}]},
 
   // {
