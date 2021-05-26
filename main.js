@@ -163,6 +163,25 @@ const mask = [""]
 
 const tests = [
   {
+    name: "efficient substring?", cases: [{ name: "subs len 100", setup: `const str = "qwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnm"`, body: `str.substring(1,1+i%100);` },
+    { name: "subs len 1000", setup: `const str = "qwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnm"`, body: `str.substring(1,1+i%1000);` }]
+  },
+  {
+    name: "Math.min", cases: [{ name: "Math.min", body: `Math.min(i,0)` },
+    { name: "2 arg min", setup: `const min = (a,b)=>{if(a<b)return a;return b}`, body: `min(i,0)` },
+    {
+      name: "many arg min", setup: `const min = (...args)=>{
+        if(args.length===0)return
+      let result = args[0];
+      for(let i=1;i<args.length;i++){
+        const arg = args[0]
+        if(arg<result)result=arg
+      }
+      return result
+    }`, body: `min(i,0)`
+    }]
+  },
+  {
     name: "reduce styles", timeToSpend: 10, cases: [
       { name: "c style for", program: `let thwab = 0;for(let i=0;i<reps;i++){thwab+=rands[i]}` },
       { name: "while", program: `let thwab = 0;let i=0;while(i<reps){i++;thwab+=rands[i]}` },
