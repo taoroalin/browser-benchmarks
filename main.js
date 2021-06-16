@@ -118,7 +118,7 @@ const renderTest = (testResult) => {
   //   resultEl.children[1].innerText = result.times[result.times.length - 1].toPrecision(3)
   //   el.children[1].appendChild(resultEl)
   // }
-  console.log(testResult)
+  // console.log(testResult)
   testsElement.appendChild(el)
   chart(el.children[3], testResult)
 }
@@ -162,6 +162,8 @@ const runTest = (test) => {
 const mask = [""]
 
 const tests = [
+  { name: "performance.now", cases: [{ name: "performance.now", body: `performance.now()` }] },
+  { name: "setTimeout+clearTimeout", cases: [{ name: "setTimeout+clearTimeout", body: `const x = setTimeout(110,()=>{});clearTimeout(x)` }] },
   {
     name: "efficient substring?", cases: [{ name: "subs len 100", setup: `const str = "qwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnm"`, body: `str.substring(1,1+i%100);` },
     { name: "subs len 1000", setup: `const str = "qwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnmqwertyuiopasdfghjklzxcvbnm"`, body: `str.substring(1,1+i%1000);` }]
