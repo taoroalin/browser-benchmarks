@@ -24,7 +24,6 @@ const chart = (canvas, data, config) => {
   ctx.font = `${config.fontSize * config.canvasScale}px verdana`
 
   for (let col of data.results) {
-    console.log(col)
     const times = col.times
     for (let i = 0; i < times.length; i++) {
       let num = times[i]
@@ -62,7 +61,6 @@ const chart = (canvas, data, config) => {
   }
 
   for (let i = Math.ceil(Math.log10(ymin)); i < Math.floor(Math.log10(ymax)) + 1; i++) {
-    console.log(`lining ${i}`)
     ctx.fillStyle = "#000000"
     ctx.strokeStyle = "#000000"
     const y = yoffset + canvasHeight - i * pxPerY
@@ -79,12 +77,14 @@ const chart = (canvas, data, config) => {
 
   for (let colNum = 0; colNum < data.results.length; colNum++) {
     const col = data.results[colNum]
+    console.log(col)
+    const maxThroughput = Math.round((Math.log10(col.times[col.times.length - 1]) + col.times.length) * 10) / 10
     const times = col.times
     const strokeStyle = config.colorScheme(colNum, data.results.length)
     ctx.strokeStyle = strokeStyle
     ctx.fillStyle = strokeStyle
-    ctx.fillText(col.name, 5 * config.canvasScale, (config.fontSize * 1.15 * config.canvasScale) * (colNum + 1.8), 1000)
-    console.log(col.name)
+    const printText = col.name + " " + maxThroughput
+    ctx.fillText(printText, 5 * config.canvasScale, (config.fontSize * 1.15 * config.canvasScale) * (colNum + 1.8), 1000)
     let last = times[0]
     ctx.beginPath()
     ctx.moveTo(0, yoffset + canvasHeight - pxPerY * Math.log10(last))
