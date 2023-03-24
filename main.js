@@ -1,4 +1,4 @@
-let timeToSpend = 20
+let timeToSpend = 100
 let stime
 
 let minReps = 10
