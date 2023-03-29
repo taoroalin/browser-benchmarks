@@ -5,7 +5,7 @@ const cpy = (obj) => {
     } else {
       const result = {}
       for (let key in obj) {
-        result[key] = cpy(obj[key])
+        result[key] = deepCopy(obj[key])
       }
       return result
     }
@@ -19,14 +19,14 @@ const stringifyJSSlow = (obj) => {
     if (obj instanceof Array) {
       let result = "["
       for (let i = 0; i < obj.length - 1; i++) {
-        result += stringifyJSSlow(obj[i]) + ","
+        result += stringifyObjectSlow(obj[i]) + ","
       }
-      result += stringifyJSSlow(obj[obj.length - 1]) + "]"
+      result += stringifyObjectSlow(obj[obj.length - 1]) + "]"
       return result
     } else {
       let result = "{"
       for (let key in obj) {
-        result += '"' + key + '":' + stringifyJSSlow(obj[key]) + ","
+        result += '"' + key + '":' + stringifyObjectSlow(obj[key]) + ","
       }
       result = result.substring(0, result.length - 1) + "}"
       return result
@@ -42,10 +42,10 @@ const stringifyJS = (obj, result) => {
     if (obj instanceof Array) {
       result += "["
       for (let i = 0; i < obj.length - 1; i++) {
-        result = stringifyJS(obj[i], result)
+        result = stringifyObject(obj[i], result)
         result += ","
       }
-      result = stringifyJS(obj[obj.length - 1], result)
+      result = stringifyObject(obj[obj.length - 1], result)
       result += "]"
       return result
     } else {
@@ -53,12 +53,12 @@ const stringifyJS = (obj, result) => {
       const keys = Object.keys(obj)
       for (let i = 0; i < keys.length - 1; i++) {
         result += '"' + keys[i] + '":'
-        result = stringifyJS(obj[keys[i]], result)
+        result = stringifyObject(obj[keys[i]], result)
         result += ","
       }
       const temp = keys[keys.length - 1]
       result += '"' + temp + '":'
-      result = stringifyJS(obj[temp], result)
+      result = stringifyObject(obj[temp], result)
       result += "}"
       return result
     }
